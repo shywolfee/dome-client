@@ -13,6 +13,7 @@ import { resolveGameAddress } from "../services/socket-address.js";
 import { forwardMudData } from "../services/socket-data-flow.js";
 import { createTelnetIacProcessor } from "../services/telnet-iac-processor.js";
 import { bindSocketSession } from "../services/socket-session.js";
+import { createMudDecoder, normalizeEncoding } from "../services/mud-encoding.js";
 import { handleTelnetIacEvent } from "./telnet-iac.js";
 import { fileURLToPath } from "node:url";
 
@@ -70,6 +71,9 @@ export async function connection(socket) {
     mudTlsEnabled: MUD_TLS_ENABLED
   });
   socket.gameAddress = gameAddress;
+  const requestedEncoding = normalizeEncoding(socket.handshake?.query?.encoding);
+  const decoder = createMudDecoder(requestedEncoding);
+  socket.encoding = requestedEncoding;
   let moo;
   try {
     moo = await connectToMud({
@@ -111,7 +115,7 @@ export async function connection(socket) {
       dnsErrorHandler(err, socket, address);
     }
     socket.isActive = true;
-    socket.emit("connected", new Date().toString());
+    socket.emit("connected", { date: new Date().toString(), encoding: decoder.encoding });
   };
   await onConnect();
 
@@ -129,7 +133,8 @@ export async function connection(socket) {
       shortenEnabled: SHORTEN_ENABLED,
       shortenUrls,
       getUserIdentity: userIp,
-      telnetIacProcessor
+      telnetIacProcessor,
+      decoder
     });
   });
 
@@ -140,6 +145,7 @@ export async function connection(socket) {
     poweredBy: config.node.poweredBy,
     shortenEnabled: SHORTEN_ENABLED,
     logUser,
-    logError
+    logError,
+    encoding: requestedEncoding
   });
 }

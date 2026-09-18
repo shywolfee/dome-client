@@ -1,5 +1,6 @@
 import config from "../config/index.js";
 import { connectedStats } from "../services/multi-mud-metrics.js";
+import { loadMudDirectory } from "../services/mud-directory.js";
 
 export function connect(req, res) {
   const gameName = config.moo.name;
@@ -13,6 +14,7 @@ export function connect(req, res) {
     mooHostname: config.moo.host,
     mooPort: config.moo.port,
     connected: () => stats,
+    mudDirectory: isMultiMud ? loadMudDirectory() : [],
     showWebsiteAuth: config.remoteAuth.enabled,
     signupUrl: config.website.signupUrl,
     "meta": {

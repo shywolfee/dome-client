@@ -33,17 +33,54 @@ export function createConnectAction({
       port: portField?.value
     });
     const useTls = tlsField?.checked === true;
+    const encoding = doc.getElementById("mud-encoding")?.value || "auto";
     store.put("game-hostname", host);
     store.put("game-port", port);
     if (tlsField) {
       store.put(`game-transport-tls:${host}:${port}`, useTls);
     }
+    store.put(`game-encoding:${host}:${port}`, encoding);
     win.location = buildPlayerClientUrl({
       host,
       port,
       transportMode: useTls ? "tls" : "tcp"
+      ,encoding
     });
   };
+}
+
+export function initializeEncodingField({ doc = globalThis.document, store, host, port }) {
+  const field = doc.getElementById("mud-encoding");
+  if (!field) return;
+  const sync = () => {
+    const { host: addressHost, port: addressPort } = resolvePlayerClientAddress({
+      host: doc.getElementById("moo-hostname")?.value || host,
+      port: doc.getElementById("moo-port")?.value || port
+    });
+    field.value = store?.get(`game-encoding:${addressHost}:${addressPort}`) || "auto";
+  };
+  sync();
+  doc.getElementById("moo-hostname")?.addEventListener("input", sync);
+  doc.getElementById("moo-port")?.addEventListener("input", sync);
+}
+
+export function initializeMudDirectoryField({ doc = globalThis.document }) {
+  const searchField = doc.getElementById("mud-directory-search");
+  const languageField = doc.getElementById("mud-language-filter");
+  const links = Array.from(doc.querySelectorAll(".mud-directory-link"));
+  if ((!searchField && !languageField) || links.length === 0) return;
+  const applyFilters = () => {
+    const query = searchField?.value.trim().toLowerCase() || "";
+    const language = languageField?.value || "";
+    links.forEach((link) => {
+      const languageLabel = link.nextElementSibling?.textContent.trim().toLowerCase() || "unknown";
+      const matchesSearch = query === "" || link.dataset.search.includes(query);
+      const matchesLanguage = language === "" || languageLabel === language;
+      link.classList.toggle("hide", !matchesSearch || !matchesLanguage);
+    });
+  };
+  searchField?.addEventListener("input", applyFilters);
+  languageField?.addEventListener("change", applyFilters);
 }
 
 export function setupConnectPageChrome({ doc = globalThis.document, win = globalThis.window }) {

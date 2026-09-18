@@ -4,12 +4,33 @@
 </p>
 <br />
 
+## Local Windows launcher
+
+From the repository folder, double-click `run domeclient.bat`. It installs dependencies on first run, creates a local `.env` from `.env-example-local` when needed, builds the browser bundle, and starts the client. Open the local URL printed by the server.
+
+The multi-MUD connect screen includes a bundled directory of active/recently reachable games from mu*index, MUDVerse, and MudStats. mu*index entries include measured language and charset metadata where available; selecting one applies its default encoding, including GBK/Big5, EUC-KR, and KOI8-R language defaults. TopMUDSites, MUDConnect, and the unreliable TheMUDs.org listing are not used.
+
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?logo=node.js&logoColor=white)](#requirements)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE.txt)
 
 Dome Client is the maintained successor to the [Legacy Dome Client](https://github.com/javaChilly/dome-client.js), with ongoing fixes, modernized dependencies, a developer IDE for editing MOO verbs & properties, and expanded documentation.
 
 It is a browser-based MUD client built with Node.js, Express, and Socket.io. It bridges browser WebSocket connections to traditional telnet-based MUD servers, so players can connect without installing anything.
+
+## Differences in This Fork
+
+This fork extends the original [SindomeCorp/dome-client](https://github.com/SindomeCorp/dome-client) for general-purpose multi-MUD use:
+
+- Supports connections to arbitrary MUD hosts and ports instead of a single configured game.
+- Adds a bundled directory of 841 deduplicated, currently reachable or recently confirmed MUDs from mu*index, MUDVerse, and MudStats.
+- Adds clickable directory links with search and language filtering, including Chinese, English, German, Italian, Korean, Polish, Russian, Spanish, and unknown-language listings.
+- Adds explicit and automatic encoding support for UTF-8, GBK/GB18030, Big5, EUC-KR/CP949, Shift-JIS, EUC-JP, KOI8-R/KOI8-U, CP866, Windows code pages, and ISO-8859-1.
+- Applies per-MUD encoding defaults from directory metadata and remembers manually selected encodings per host and port.
+- Excludes stale directory sources such as TheMUDs.org, TopMUDSites, and MUDConnect.
+- Improves command delivery with ordered socket writes, byte-accurate command encoding, connection checks, and acknowledgements.
+- Includes `run domeclient.bat` for local Windows setup, building, server startup, readiness checking, and browser launch.
+
+The directory can be refreshed with `scripts/refresh-mud-directory.mjs`. Directory data is bundled locally so the connect page remains usable without live directory requests.
 
 ## Try It Live
 

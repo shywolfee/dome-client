@@ -97,7 +97,8 @@
 
     input[type=text],
     input[type=password],
-    input[type=email] {
+    input[type=email],
+    input[type=search] {
       width: 100%;
       max-width: 100%;
       padding: 8px 12px;
@@ -106,6 +107,53 @@
       border: 1px solid var(--gray, @gray);
       color: var(--almostBlack, @almostBlack);
       background: #fff;
+    }
+
+    .mud-directory-list {
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid var(--gray, @gray);
+      border-radius: 6px;
+      max-height: 420px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .mud-directory-link {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      display: block;
+      padding: 8px 10px;
+      text-decoration: none;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      &:hover,
+      &:focus {
+        background: rgba(0, 102, 204, 0.55);
+        color: #fff;
+        outline: none;
+      }
+    }
+
+    .mud-directory-name,
+    .mud-directory-details {
+      display: block;
+    }
+
+    .mud-directory-language {
+      display: none;
+    }
+
+    .mud-directory-name {
+      font-weight: bold;
+    }
+
+    .mud-directory-details {
+      color: #ccc;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
     label {

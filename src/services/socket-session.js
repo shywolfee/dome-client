@@ -1,3 +1,5 @@
+import { encodeMudInput } from "./mud-encoding.js";
+
 export function bindSocketSession({
   socket,
   moo,
@@ -5,9 +7,24 @@ export function bindSocketSession({
   poweredBy,
   shortenEnabled,
   logUser,
-  logError
+  logError,
+  encoding
 }) {
-  const writeAsync = data => new Promise(resolve => moo.write(data, "utf8", resolve));
+  let writeQueue = Promise.resolve();
+  const writeRaw = data => new Promise((resolve, reject) => {
+    const output = encoding ? encodeMudInput(data, encoding) : data;
+    const done = (error) => error ? reject(error) : resolve();
+    if (Buffer.isBuffer(output)) {
+      moo.write(output, done);
+    } else {
+      moo.write(output, "utf8", done);
+    }
+  });
+  const writeAsync = data => {
+    const write = writeQueue.then(() => writeRaw(data));
+    writeQueue = write.catch(() => {});
+    return write;
+  };
 
   moo.on("end", function() {
     logger.debug("moo connection sent end");
@@ -33,9 +50,13 @@ export function bindSocketSession({
     logError(socket, err);
   });
 
-  socket.on("shorten-on", function() {
-    if (!shortenEnabled) return;
+  socket.on("shorten-on", function(_data, acknowledge) {
+    if (!shortenEnabled) {
+      acknowledge?.({ status: "shortening disabled" });
+      return;
+    }
     socket.shortenUrls = true;
+    acknowledge?.({ status: "shortening enabled" });
   });
 
   socket.on("disconnect", function(data) {
@@ -45,12 +66,24 @@ export function bindSocketSession({
     if (data) {
       logger.debug("disconnected from client: " + data);
     }
-    if (!moo.socketQuit) moo.write("@quit" + "\r\n", "utf8", function() {});
+    if (!moo.socketQuit) {
+      const output = encoding ? encodeMudInput("@quit" + "\r\n", encoding) : "@quit" + "\r\n";
+      if (Buffer.isBuffer(output)) {
+        moo.write(output, function() {});
+      } else {
+        moo.write(output, "utf8", function() {});
+      }
+    }
   });
 
-  socket.on("input", async function(command) {
-    if (command == null) {
+  socket.on("input", async function(command, acknowledge) {
+    if (typeof command !== "string" || !command.length) {
       socket.emit("error", new Error("no input"));
+      acknowledge?.({ status: "error: no input" });
+      return;
+    }
+    if (socket.isActive === false) {
+      acknowledge?.({ status: "error: not connected" });
       return;
     }
     logConnectCommand(socket, command, logUser);
@@ -61,8 +94,11 @@ export function bindSocketSession({
         socket.isActive = false;
         moo.end();
         socket.emit("disconnected");
+        acknowledge?.({ status: "command sent" });
       } else {
-        socket.emit("status", "sent " + command.length + " characters");
+        const sentStatus = "sent " + command.length + " characters";
+        socket.emit("status", sentStatus);
+        acknowledge?.({ status: "command sent" });
       }
       socket.emit("status", "command sent from " + poweredBy + " to moo at " + new Date().toString());
     } catch (exception) {
@@ -71,6 +107,7 @@ export function bindSocketSession({
       if (socket.isActive) {
         socket.emit("error", exception);
       }
+      acknowledge?.({ status: "error: " + exception.message });
     }
   });
 }

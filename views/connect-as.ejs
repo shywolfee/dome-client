@@ -28,10 +28,49 @@
   <div class="option-group connect-as-group">
     <h2 style="color: #eeeeee">Connect To ...</h2>
     <div class="moo-login-box">
+      <% var mudLanguages = Array.from(new Set((mudDirectory || []).map(function(mud) { return mud.language || 'Unknown'; }))).sort(function(a, b) { return a.localeCompare(b); }); %>
       <label for="moo-hostname">HOSTNAME</label><br>
       <input id="moo-hostname" type="text" name="hostname" value="<%= mooHostname %>" /><br>
       <label for="moo-port">PORT</label><br>
       <input id="moo-port" type="number" name="port" value="<%= mooPort %>" min="23" max="65535" step="1"/><br>
+      <label for="mud-language-filter">LANGUAGE</label><br>
+      <select id="mud-language-filter" name="language_filter">
+        <option value="">Any language</option>
+        <% mudLanguages.forEach(function(language) { %>
+        <option value="<%= language.toLowerCase() %>"><%= language %></option>
+        <% }); %>
+      </select><br>
+      <label for="mud-directory-search">MUD DIRECTORY</label><br>
+      <input id="mud-directory-search" type="search" placeholder="Search MUDs by name or host" autocomplete="off"><br>
+      <div id="mud-directory" class="mud-directory-list">
+        <% (mudDirectory || []).forEach(function(mud) {
+          var mudUrl = '/player-client/?gh=' + encodeURIComponent(mud.host) + '&gp=' + encodeURIComponent(mud.port);
+          if (mud.tls) mudUrl += '&transport_mode=tls';
+          if (mud.encoding && mud.encoding !== 'auto') mudUrl += '&encoding=' + encodeURIComponent(mud.encoding);
+        %>
+        <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>"><span class="mud-directory-name"><%= mud.name %></span><span class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></span></a>
+        <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
+        <% }); %>
+      </div>
+      <label for="mud-encoding">MUD ENCODING</label><br>
+      <select id="mud-encoding" name="encoding">
+        <option value="auto">Auto-detect</option>
+        <option value="utf8">UTF-8</option>
+        <option value="gbk">GBK / GB2312</option>
+        <option value="gb18030">GB18030</option>
+        <option value="big5">Big5</option>
+        <option value="euc-kr">EUC-KR</option>
+        <option value="cp949">Korean UHC / CP949</option>
+        <option value="shift_jis">Shift-JIS</option>
+        <option value="euc-jp">EUC-JP</option>
+        <option value="koi8-r">KOI8-R</option>
+        <option value="koi8-u">KOI8-U</option>
+        <option value="cp866">CP866</option>
+        <option value="cp437">CP437</option>
+        <option value="windows-1251">Windows-1251</option>
+        <option value="windows-1252">Windows-1252</option>
+        <option value="iso-8859-1">ISO-8859-1</option>
+      </select><br>
       <% if (isMudTlsEnabled) { %>
       <div class="mud-tls-choice">
         <input id="mud-use-tls" type="checkbox" name="mud_tls">
@@ -117,6 +156,25 @@
         <input id="moo-username" type="text" name="username"><br>
         <label for="moo-password">PASSWORD</label><br>
         <input id="moo-password" type="password" name="password"><br>
+        <label for="mud-encoding">MUD ENCODING</label><br>
+        <select id="mud-encoding" name="encoding">
+          <option value="auto">Auto-detect</option>
+          <option value="utf8">UTF-8</option>
+          <option value="gbk">GBK / GB2312</option>
+          <option value="gb18030">GB18030</option>
+          <option value="big5">Big5</option>
+          <option value="euc-kr">EUC-KR</option>
+          <option value="cp949">Korean UHC / CP949</option>
+          <option value="shift_jis">Shift-JIS</option>
+          <option value="euc-jp">EUC-JP</option>
+          <option value="koi8-r">KOI8-R</option>
+          <option value="koi8-u">KOI8-U</option>
+          <option value="cp866">CP866</option>
+          <option value="cp437">CP437</option>
+          <option value="windows-1251">Windows-1251</option>
+          <option value="windows-1252">Windows-1252</option>
+          <option value="iso-8859-1">ISO-8859-1</option>
+        </select><br>
         <div class="relative-group">
           <div class="pull-right">
             <input class="btn btn-lg btn-primary" id="connect_as" type="submit" name="connect" value="Connect">

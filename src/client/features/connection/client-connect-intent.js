@@ -21,7 +21,7 @@ function normalizeTransportMode(transportMode) {
   return String(transportMode || "").trim().toLowerCase() === "tls" ? "tls" : "tcp";
 }
 
-function buildPlayerClientUrl({ host, port, transportMode }) {
+function buildPlayerClientUrl({ host, port, transportMode, encoding }) {
   const address = resolvePlayerClientAddress({ host, port });
   const params = new URLSearchParams();
   params.set("gh", address.host);
@@ -29,6 +29,7 @@ function buildPlayerClientUrl({ host, port, transportMode }) {
   if (normalizeTransportMode(transportMode) === "tls") {
     params.set("transport_mode", "tls");
   }
+  if (encoding && encoding !== "auto") params.set("encoding", encoding);
   return `/player-client/?${params.toString()}`;
 }
 

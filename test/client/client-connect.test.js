@@ -7,11 +7,29 @@ import {
   bindSavedUserPicker,
   createConnectAction,
   getParameterByName,
+  initializeMudDirectoryField,
   initializeAddressFields,
   initializeTransportModeField,
   parsePlayerClientTransportMode,
   setupConnectPageChrome
 } from "../../src/client/features/connection/client-connect-workflows.js";
+
+test("MUD directory filters links by language", () => {
+  const { window } = setupDom(null, `<!doctype html><html><body>
+    <select id="mud-language-filter"><option value="">Any language</option><option value="chinese">Chinese</option></select>
+    <input id="mud-directory-search">
+    <a class="mud-directory-link" data-search="dragon chinese"></a><span>Chinese</span>
+    <a class="mud-directory-link" data-search="dragon english"></a><span>English</span>
+  </body></html>`);
+
+  initializeMudDirectoryField({ doc: window.document });
+  const language = window.document.getElementById("mud-language-filter");
+  const links = [...window.document.querySelectorAll(".mud-directory-link")];
+  language.value = "chinese";
+  language.dispatchEvent(new window.Event("change"));
+  assert.equal(links[0].classList.contains("hide"), false);
+  assert.equal(links[1].classList.contains("hide"), true);
+});
 
 function createStore(t) {
   return {

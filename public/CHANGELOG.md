@@ -2,9 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2026-09-17
+
+### Added
+- Replaced the MUD directory dropdown with a searchable, scrollable list of direct connection links.
+- Added mu*index active-game imports with player counts, language, measured charset, reachability status, and TLS metadata; selecting a directory entry now applies its default encoding automatically.
+- Added a MUD directory with 841 deduplicated entries from mu*index, MUDVerse, and currently online MudStats worlds, with source/status labels.
+- Added automatic and manually selectable MUD encodings, including Big5, GBK/GB18030, EUC-KR, Shift-JIS, KOI8-R, and Windows code pages.
+
+### Accessibility and command fixes
+- Serialized MUD writes so rapid commands remain ordered, and fixed Socket.io acknowledgement handling for initial commands and URL-shortening setup.
+
+### Changed
+- Removed TheMUDs.org records because their online status was not reliable.
+- Added a language filter to the MUD directory, including an Unknown option for listings without language metadata.
+
 ## 2026-07-06
 
 ### Fixed
+- Fixed MUD command delivery so encoded input is written as raw bytes, and added Socket.io acknowledgements for successful or failed commands.
 - Fixed SDWC nowrap blocks so preformatted output preserves repeated and leading spaces.
 
 ## 2026-06-30

@@ -13,6 +13,8 @@ import {
   getParameterByName,
   initializeAddressFields,
   initializeTransportModeField,
+  initializeEncodingField,
+  initializeMudDirectoryField,
   setupConnectPageChrome
 } from "../features/connection/client-connect-workflows.js";
 
@@ -29,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     host: DEFAULT_MUD_HOST,
     port: DEFAULT_MUD_PORT
   });
+  initializeEncodingField({ doc: document, store, host: DEFAULT_MUD_HOST, port: DEFAULT_MUD_PORT });
+  initializeMudDirectoryField({ doc: document });
 
   const autoUser = getParameterByName("auto", window.location.search);
   const usernames = savedUsersStore.getUsernames();

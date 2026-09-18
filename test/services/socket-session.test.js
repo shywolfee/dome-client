@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { bindSocketSession } from "../../src/services/socket-session.js";
 
-function createSession({ shortenEnabled = true } = {}) {
+function createSession({ shortenEnabled = true, encoding } = {}) {
   const socket = new EventEmitter();
   socket.isActive = true;
   const events = [];
@@ -15,9 +15,10 @@ function createSession({ shortenEnabled = true } = {}) {
   socket.on("error", () => {});
   const moo = new EventEmitter();
   const writes = [];
-  moo.write = (data, _encoding, cb) => {
+  moo.write = (data, encodingOrCb, cb) => {
     writes.push(data);
-    if (typeof cb === "function") cb();
+    const callback = typeof encodingOrCb === "function" ? encodingOrCb : cb;
+    if (typeof callback === "function") callback();
   };
   moo.end = () => moo.emit("end");
   const logs = [];
@@ -33,7 +34,8 @@ function createSession({ shortenEnabled = true } = {}) {
     poweredBy: "tester",
     shortenEnabled,
     logUser: (_socket, label, moreFields = []) => users.push([label, ...moreFields]),
-    logError: (_socket, err) => logs.push(["logError", err.message])
+    logError: (_socket, err) => logs.push(["logError", err.message]),
+    encoding
   });
   return { socket, moo, writes, events, logs, users };
 }
@@ -55,6 +57,16 @@ test("bindSocketSession writes input and emits command status", async () => {
   assert.deepEqual(session.writes, ["look\r\n"]);
   assert.ok(session.events.some(event => event[0] === "status" && event[1] === "sent 4 characters"));
   assert.ok(session.events.some(event => event[0] === "status" && event[1].includes("command sent from tester")));
+});
+
+test("bindSocketSession writes selected encoding bytes and acknowledges input", async () => {
+  const session = createSession({ encoding: "koi8-r" });
+  const acknowledgements = [];
+  session.socket.emit("input", "привет", (state) => acknowledgements.push(state));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(Buffer.isBuffer(session.writes.at(-1)));
+  assert.equal(session.writes.at(-1).toString("hex"), "d0d2c9d7c5d40d0a");
+  assert.deepEqual(acknowledgements, [{ status: "command sent" }]);
 });
 
 test("bindSocketSession logs connect commands and rejects null input", async () => {

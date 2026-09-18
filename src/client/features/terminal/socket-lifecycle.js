@@ -5,9 +5,12 @@ import { store } from "../../core/store.js";
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const emitAsync = (socket, event, ...args) => new Promise((resolve, reject) => {
-  socket.emit(event, ...args, (err) => {
-    if (err) reject(err);
-    else resolve();
+  socket.emit(event, ...args, (result) => {
+    if (result?.status?.startsWith("error:")) {
+      reject(new Error(result.status));
+      return;
+    }
+    resolve(result);
   });
 });
 
@@ -96,6 +99,7 @@ export function setupSocket({
   const queryHost = (searchParams.get("gh") || "").trim();
   const queryPort = (searchParams.get("gp") || "").trim();
   const transportMode = (searchParams.get("transport_mode") || "").trim().toLowerCase();
+  const encoding = (searchParams.get("encoding") || "auto").trim().toLowerCase();
   const socketQuery = {};
   if (queryHost) {
     socketQuery.host = queryHost;
@@ -106,6 +110,7 @@ export function setupSocket({
   if (transportMode === "tls") {
     socketQuery.transport_mode = "tls";
   }
+  if (encoding && encoding !== "auto") socketQuery.encoding = encoding;
 
   const ioSocket = ioClient("https:" == doc.location.protocol ? socketUrlSSLValue : socketUrlValue, {
     "sync disconnect on unload": true, // send 'disconnect' event when the page is left

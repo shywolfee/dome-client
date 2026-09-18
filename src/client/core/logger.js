@@ -1,4 +1,4 @@
-const endpoint = window.LOG_ENDPOINT;
+const endpoint = globalThis.window?.LOG_ENDPOINT;
 
 function send(level, args) {
   const log = console[level] || console.log;

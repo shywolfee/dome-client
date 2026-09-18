@@ -8,14 +8,18 @@ export async function forwardMudData({
   shortenEnabled,
   shortenUrls,
   getUserIdentity,
-  telnetIacProcessor
+  telnetIacProcessor,
+  decoder
 }) {
   try {
     const displayData = telnetIacProcessor ? telnetIacProcessor.filter(data) : data;
     if (displayData.length === 0) {
       return;
     }
-    const text = displayData.toString();
+    const text = decoder ? decoder.decode(displayData) : displayData.toString();
+    if (!text) {
+      return;
+    }
     if (text.indexOf(CLIENT_USER_MARKER) !== -1) {
       const identity = Object.prototype.hasOwnProperty.call(socket, "hostname") ? socket.hostname : getUserIdentity(socket);
       moo.write("@dome-client-user " + identity + "\r\n", "utf8");
