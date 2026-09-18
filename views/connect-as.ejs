@@ -48,7 +48,7 @@
           if (mud.tls) mudUrl += '&transport_mode=tls';
           if (mud.encoding && mud.encoding !== 'auto') mudUrl += '&encoding=' + encodeURIComponent(mud.encoding);
         %>
-        <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>"><span class="mud-directory-name"><%= mud.name %></span><span class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></span></a>
+        <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>"><div class="mud-directory-name"><%= mud.name %></div><div class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></div></a>
         <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
         <% }); %>
       </div>
