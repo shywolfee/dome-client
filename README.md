@@ -17,6 +17,10 @@ Dome Client is the maintained successor to the [Legacy Dome Client](https://gith
 
 It is a browser-based MUD client built with Node.js, Express, and Socket.io. It bridges browser WebSocket connections to traditional telnet-based MUD servers, so players can connect without installing anything.
 
+## Attribution
+
+This project is a fork of [SindomeCorp/dome-client](https://github.com/SindomeCorp/dome-client), which in turn follows the earlier [Legacy Dome Client](https://github.com/javaChilly/dome-client.js). The fork preserves the original BSD 3-Clause licensing and attribution. Directory metadata is collected from the sources documented in the bundled data and refresh script.
+
 ## Differences in This Fork
 
 This fork extends the original [SindomeCorp/dome-client](https://github.com/SindomeCorp/dome-client) for general-purpose multi-MUD use:
@@ -32,15 +36,9 @@ This fork extends the original [SindomeCorp/dome-client](https://github.com/Sind
 
 The directory can be refreshed with `scripts/refresh-mud-directory.mjs`. Directory data is bundled locally so the connect page remains usable without live directory requests.
 
-## Try It Live
-
-Sindome provides a hosted version of the client that can connect to any MUD. You are free to use this version to check out the features, or to connect to a game you like to play.
-
-[Sindome Public Client](https://pubclient.sindome.org)
-
 ## Single-MUD Quick Start
 ```bash
-git clone git@github.com:SindomeCorp/dome-client.git
+git clone https://github.com/shywolfee/dome-client.git
 cd dome-client
 npm i
 cp .env-example-local .env
@@ -53,7 +51,7 @@ Set `MUD_TLS_ENABLED=true` only when that configured MUD endpoint supports TLS; 
 
 ## Multi-MUD Quick Start
 ```bash
-git clone git@github.com:SindomeCorp/dome-client.git
+git clone https://github.com/shywolfee/dome-client.git
 cd dome-client
 npm i
 cp .env-example-local .env
@@ -80,7 +78,18 @@ Open in Browser: http://localhost:8080
 In this mode, the splash page is host/port-first and users can connect to different games; successful connections are tracked in persisted multi-MUD metrics.
 Set `MUD_TLS_ENABLED=true` to expose an optional **Use TLS** connection choice for users. Plain TCP remains the default for each new host/port.
 
-**Quick links:** [Installation](#installation) · [Setup Guides](#setup-guides) · [Contributing](#contributing)
+**Quick links:** [Requirements](#requirements) · [Connection Modes](#connection-modes) · [Planned Improvements](#planned-improvements) · [Contributing](#contributing)
+
+## Planned Improvements
+
+These are tracked goals for the fork:
+
+- [ ] Proper mobile support across phone and tablet screen sizes, including touch-friendly terminal interaction.
+- [ ] An Electron desktop application with a packaged local runtime.
+- [ ] MSSP integration for live player counts and other server-status readouts.
+- [ ] Opt-in live directory updates from the mu*index API, with local bundled data remaining available as a fallback.
+- [ ] More automated reachability checks and directory refresh reporting.
+- [ ] More complete per-MUD language and encoding metadata.
 
 ## Requirements
 
