@@ -169,7 +169,11 @@ export function createSocketOutputRenderer({
 
     const outputSegment = renderOutputSegment(rawSegment);
     triggerAlertIfMatched(outputSegment);
-    getOutputTarget().insertAdjacentHTML("beforeend", wrapLinesToDivs(outputSegment));
+    const target = getOutputTarget();
+    const existingNodes = new Set(target.childNodes);
+    target.insertAdjacentHTML("beforeend", wrapLinesToDivs(outputSegment));
+    const addedNodes = Array.from(target.childNodes).filter((node) => !existingNodes.has(node));
+    client.applyScreenReaderOutput?.({ rawSegment, addedNodes, target });
 
     return client.buffer.childNodes.length;
   };

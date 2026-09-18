@@ -50,6 +50,7 @@ const EDITOR_TYPE_CHOICES = [
 const EDIT_THEME_CHOICES = EDIT_THEMES.map((theme) => ({ value: theme, label: theme }));
 
 export const CLIENT_OPTION_DEFINITIONS = [
+  { key: "screenreader", label: "Screen Reader Mode", param: "sr", preferenceName: "screenReaderMode", def: false, ok: [true, false], group: "general", control: "toggle", tooltip: "When enabled, incoming output gets a cleaner screen-reader representation without changing the visible output or adding a new live region. Prompts are announced after the output around them." },
   { key: "commands", label: "Use Command Hints", param: "cs", preferenceName: "commandSuggestions", def: true, ok: [true, false], group: "general", control: "toggle", tooltip: "When enabled, typing in the input buffer shows matching command suggestions from the server-backed autocomplete list. Suggestions appear after at least two characters." },
   { key: "shorten", label: "Shorten Long Web Links", param: "su", preferenceName: "shortenUrls", def: true, ok: [true, false], group: "general", control: "toggle", visibleWhen: "shortenEnabled", tooltip: "When enabled and URL shortening is configured on the server, long links in incoming MOO output are replaced with shorter links before they appear in the scrollback." },
   { key: "scroll", label: "Toggle Scroll & Auto Scroll", param: "as", preferenceName: "autoScroll", def: "dbl", ok: ["dbl", "long", "none"], choices: SCROLL_TOGGLE_CHOICES, group: "general", control: "select", labelClass: "pull-left", inputName: "auto-scroll-toggle", tooltip: "Controls how you toggle automatic scrolling. Double Click and Long Click toggle by interacting with the output buffer; Pause Button Only uses the toolbar control." },
@@ -75,7 +76,7 @@ export const CLIENT_OPTION_DEFINITIONS = [
 ];
 
 const CLIENT_OPTION_GROUP_ORDER = {
-  general: ["localecho", "commands", "buffer", "broadly", "shorten", "imageview", "playding", "scroll", "scrolluppause", "transparent", "logcss", "sdwcnowrap"],
+  general: ["screenreader", "localecho", "commands", "buffer", "broadly", "shorten", "imageview", "playding", "scroll", "scrolluppause", "transparent", "logcss", "sdwcnowrap"],
   fonts: ["outfont", "outfontsize", "editorfont", "inputfont", "inputfontsize", "inputfontcolor", "inputbgcolor", "colorset"],
   editor: ["edittype", "edittheme"]
 };

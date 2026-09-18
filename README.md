@@ -120,6 +120,7 @@ These are tracked goals for the fork:
 - Command history search overlay (`Ctrl+R`) with live filtering, de-duplicated exact matches, keyboard navigation, and one-key insert back into the input buffer.
 - Mobile-focused UX: plain-text keyboard hints for command entry (no autocorrect/caps), dedicated up/down history buttons, responsive input sizing, touch-friendly action toolbar, centered overlay dialogs, and guarded clear-buffer confirmation.
 - Rich client options: command hints, local echo, image preview, overlay transparency, buffer size, alert sound, font/theme choices, editor mode selection, separate input/output font sizing, configurable input text/background colors, and `Scroll Up to Pause` autoscroll behavior.
+- Optional Screen Reader Mode: preserves the visible terminal and existing live region while removing ANSI/control and decorative terminal noise from new accessible output and announcing prompts after nearby output.
 - Client options Import/Export workflow: download all preferences as JSON, import recognized keys locally, validate ranges, normalize legacy values, and reset to defaults with explicit confirmation.
 - Session log export as HTML for preserving and sharing scrollback, with a client option to switch between default self-contained inline CSS and a lighter legacy linked stylesheet mode.
 - Better nowrap output handling via SDWC markers (`SDWC-START-NOWRAP` / `SDWC-END-NOWRAP`) and a mobile-friendly wrap option for long horizontal content.

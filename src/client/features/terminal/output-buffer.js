@@ -2,6 +2,7 @@ import { logger } from "../../core/constants.js";
 import { createSocketOutputEventHandler } from "./socket-output-effects.js";
 import { createSocketOutputProtocolParser } from "./socket-output-protocol.js";
 import { createSocketOutputRenderer } from "./socket-output-renderer.js";
+import { createScreenReaderMode } from "./screen-reader-mode.js";
 
 export function setupOutputParser({
   client,
@@ -13,10 +14,13 @@ export function setupOutputParser({
 
   const protocolParser = createSocketOutputProtocolParser();
   const renderer = createSocketOutputRenderer({ client, logger: log, nowMs });
+  const screenReaderMode = createScreenReaderMode({ client, win });
   const handleProtocolEvent = createSocketOutputEventHandler({ client, logger: log, renderer });
   client.activeEditor = protocolParser.editorState;
   client.resetSdwcNowrapState = renderer.resetSdwcNowrapState;
   client.resetAnsiRendererState = renderer.resetAnsiRendererState;
+  client.applyScreenReaderOutput = screenReaderMode.applyToAddedNodes;
+  client.refreshScreenReaderMode = screenReaderMode.refresh;
 
   client.parseSocketData = function (incomingSegmentRaw) {
     const startTime = nowMs();

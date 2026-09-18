@@ -82,6 +82,9 @@ export function createClientOptionEffects({
     },
     playDing(value) {
       client.alert.active = value && !doc.hasFocus();
+    },
+    screenReaderMode(value) {
+      client.refreshScreenReaderMode?.(value);
     }
   };
 

@@ -6,6 +6,7 @@ const setOutputActions = (options, output = []) => {
   options.setClientOptionsActions({
     setClientOption(name, value) {
       const keyByPreference = {
+        screenReaderMode: "screenreader",
         commandSuggestions: "commands",
         shortenUrls: "shorten",
         localEcho: "localecho",
