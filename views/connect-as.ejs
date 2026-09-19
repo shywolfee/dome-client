@@ -51,7 +51,20 @@
         <option value="has:AREAS">MUDs declaring areas</option>
         <option value="has:RACES">MUDs declaring races</option>
       </select>
-      <button id="mud-mssp-check-all" class="btn btn-default mud-mssp-check-all" type="button">Load MSSP directory</button>
+      <label for="mud-mssp-variable">MSSP VALUE TO SCAN</label><br>
+      <select id="mud-mssp-variable" name="mssp_variable">
+        <option value="PLAYERS">Players</option>
+        <option value="ROOMS">Rooms</option>
+        <option value="AREAS">Areas</option>
+        <option value="RACES">Races</option>
+        <option value="CLASSES">Classes</option>
+        <option value="LEVELS">Levels</option>
+        <option value="SKILLS">Skills</option>
+        <option value="OBJECTS">Objects</option>
+        <option value="MOBILES">Mobiles</option>
+        <option value="HELPFILES">Helpfiles</option>
+      </select>
+      <button id="mud-mssp-check-all" class="btn btn-default mud-mssp-check-all" type="button">Scan selected value</button>
       <span id="mud-mssp-status" class="mud-mssp-status" role="status"></span><br>
       <div id="mud-directory" class="mud-directory-list">
         <% (mudDirectory || []).forEach(function(mud) {
@@ -66,6 +79,14 @@
           <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
         </div>
         <% }); %>
+      </div>
+      <div id="mud-mssp-results-overlay" class="mud-mssp-results-overlay hide" role="dialog" aria-modal="true" aria-labelledby="mud-mssp-results-title">
+        <div class="mud-mssp-results-panel">
+          <button id="mud-mssp-results-close" class="btn btn-default mud-mssp-results-close" type="button" aria-label="Close MSSP results">Close</button>
+          <h3 id="mud-mssp-results-title">MSSP results</h3>
+          <p id="mud-mssp-results-summary" class="mud-mssp-results-summary"></p>
+          <div id="mud-mssp-results-list" class="mud-mssp-results-list"></div>
+        </div>
       </div>
       <label for="mud-encoding">MUD ENCODING</label><br>
       <select id="mud-encoding" name="encoding">

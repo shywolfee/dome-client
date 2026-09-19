@@ -188,6 +188,81 @@
       margin-left: 6px;
     }
 
+    .mud-mssp-results-overlay {
+      align-items: center;
+      background: rgba(0, 0, 0, 0.78);
+      display: flex;
+      inset: 0;
+      justify-content: center;
+      padding: 18px;
+      position: fixed;
+      z-index: 1000;
+
+      &.hide {
+        display: none;
+      }
+    }
+
+    .mud-mssp-results-panel {
+      background: #171717;
+      border: 1px solid var(--gray, @gray);
+      border-radius: 8px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7);
+      color: #fff;
+      max-height: 85vh;
+      max-width: 620px;
+      overflow: hidden;
+      padding: 18px;
+      position: relative;
+      width: 100%;
+
+      h3 {
+        margin: 0 0 4px;
+        padding-right: 90px;
+      }
+    }
+
+    .mud-mssp-results-close {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+    }
+
+    .mud-mssp-results-summary {
+      color: #ccc;
+      margin: 0 0 12px;
+    }
+
+    .mud-mssp-results-list {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      max-height: 62vh;
+      overflow-y: auto;
+    }
+
+    .mud-mssp-result-row {
+      align-items: baseline;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding: 8px 10px;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    .mud-mssp-result-name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .mud-mssp-result-value {
+      color: #f89406;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
     label {
       font-size: 15px;
       letter-spacing: .02em;

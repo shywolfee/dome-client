@@ -29,7 +29,7 @@ This fork extends the original [SindomeCorp/dome-client](https://github.com/Sind
 - Adds a bundled directory of 1,127 deduplicated, currently reachable or recently confirmed MUDs from mu*index, MUDVerse, MudStats, and IPTIA.
 - Includes 286 additional active MUD entries imported from IPTIA’s software-organized directory, after filtering detail pages to MUD/MUSH/MUCK/MOO categories and excluding BBS records.
 - Adds clickable directory links with search and language filtering, including Chinese, English, German, Italian, Korean, Polish, Russian, Spanish, and unknown-language listings.
-- Adds MSSP option-70 checks beside directory entries, a progressive MSSP directory scan, and filters for MUDs declaring values such as players, rooms, areas, races, and other MSSP variables.
+- Adds MSSP option-70 checks beside directory entries, a progressive single-variable MSSP scan, and clean popup lists for MUDs declaring values such as players, rooms, areas, races, and other MSSP variables.
 - Adds explicit and automatic encoding support for UTF-8, GBK/GB18030, Big5, EUC-KR/CP949, Shift-JIS, EUC-JP, KOI8-R/KOI8-U, CP866, Windows code pages, and ISO-8859-1.
 - Applies per-MUD encoding defaults from directory metadata and remembers manually selected encodings per host and port.
 - Excludes stale directory sources such as TheMUDs.org, TopMUDSites, and MUDConnect.
@@ -132,7 +132,7 @@ These are tracked goals for the fork:
 - Native bridge integration support (`window.DomeBridge` / `window.DomeNative`) for mobile wrappers, including queued startup event handling and native log-download routing when available.
 - Fully bundled client styling (local LESS/CSS and glyph assets), removing runtime dependency on external `dome.css` for consistent mobile/desktop rendering.
 - Optional multi-game landing mode (`MULTI_MUD`) with host/port-first connect flow and persisted per-game connection metrics.
-- MSSP directory checks from the multi-MUD landing page. Individual **Check MSSP** buttons query a game through the server, while **Load MSSP directory** checks the bundled entries progressively. Once results are loaded, the MSSP filter can show all detected MSSP games or games declaring a specific variable. MSSP checks use the standard Telnet option 70 negotiation and do not send login commands.
+- MSSP directory checks from the multi-MUD landing page. Individual **Check MSSP** buttons query the selected variable for one game. The **Scan selected value** control checks only the chosen MSSP variable across the bundled entries and opens a sorted popup containing only MUD names and that value, avoiding the time and clutter of fetching every variable for every game. MSSP checks use the standard Telnet option 70 negotiation and do not send login commands.
 
 ## Connection Modes
 

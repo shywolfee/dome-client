@@ -67,6 +67,33 @@ test("MSSP directory checks populate support and variable filters", async () => 
   assert.equal(entries[1].classList.contains("hide"), true);
 });
 
+test("MSSP value scan shows a focused popup list", async () => {
+  const { window } = setupDom(null, `<!doctype html><html><body>
+    <select id="mud-language-filter"><option value="">Any language</option></select>
+    <input id="mud-directory-search">
+    <select id="mud-mssp-filter"><option value="">All MUDs</option></select>
+    <select id="mud-mssp-variable"><option value="ROOMS">Rooms</option></select>
+    <button id="mud-mssp-check-all"></button><span id="mud-mssp-status"></span>
+    <div id="mud-directory">
+      <div class="mud-directory-entry"><a class="mud-directory-link" data-search="one" data-mssp-host="one.test" data-mssp-port="4000"></a><button class="mud-mssp-check"></button><span class="mud-mssp-result"></span><span class="mud-directory-language">English</span><div class="mud-directory-name">One MUD</div></div>
+      <div class="mud-directory-entry"><a class="mud-directory-link" data-search="two" data-mssp-host="two.test" data-mssp-port="4001"></a><button class="mud-mssp-check"></button><span class="mud-mssp-result"></span><span class="mud-directory-language">English</span><div class="mud-directory-name">Two MUD</div></div>
+    </div>
+    <div id="mud-mssp-results-overlay" class="hide"><h3 id="mud-mssp-results-title"></h3><p id="mud-mssp-results-summary"></p><div id="mud-mssp-results-list"></div><button id="mud-mssp-results-close"></button></div>
+  </body></html>`);
+
+  initializeMudDirectoryField({ doc: window.document });
+  initializeMsspDirectoryField({
+    doc: window.document,
+    win: window,
+    fetchFn: async () => ({ ok: true, async json() { return { supported: true, values: { ROOMS: "42" } }; } })
+  });
+  window.document.getElementById("mud-mssp-check-all").click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(window.document.getElementById("mud-mssp-results-overlay").classList.contains("hide"), false);
+  assert.equal(window.document.querySelectorAll(".mud-mssp-result-row").length, 2);
+  assert.equal(window.document.querySelector(".mud-mssp-result-value").textContent, "42");
+});
+
 function createStore(t) {
   return {
     put: t.mock.fn(),

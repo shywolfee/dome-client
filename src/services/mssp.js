@@ -51,11 +51,17 @@ export function normalizeMsspValues(values) {
   ]));
 }
 
+export function normalizeMsspVariable(value) {
+  const variable = String(value || "").trim().toUpperCase().replace(/\s+/g, "_");
+  return /^[A-Z][A-Z0-9_]*$/.test(variable) ? variable : "";
+}
+
 export async function probeMssp({
   host,
   port,
   useTls = false,
   timeoutMs = DEFAULT_PROBE_TIMEOUT_MS,
+  variable = "",
   connect = connectToMud
 } = {}) {
   let connection;
@@ -97,7 +103,16 @@ export async function probeMssp({
       const payload = buffer.subarray(start + 3, end).filter((byte, index, source) => {
         return !(byte === IAC && source[index + 1] === IAC);
       });
-      finish({ supported: true, values: normalizeMsspValues(parseMsspPayload(payload)) });
+      const values = normalizeMsspValues(parseMsspPayload(payload));
+      const requestedVariable = normalizeMsspVariable(variable);
+      finish({
+        supported: true,
+        values: requestedVariable
+          ? (Object.prototype.hasOwnProperty.call(values, requestedVariable)
+            ? { [requestedVariable]: values[requestedVariable] }
+            : {})
+          : values
+      });
     };
 
     connection.on("data", onData);

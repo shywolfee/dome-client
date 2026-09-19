@@ -39,3 +39,21 @@ test("MSSP probe negotiates option 70 and parses the response", async () => {
     values: { PLAYERS: "7", RACES: "Human, Elf" }
   });
 });
+
+test("MSSP probe can return only one requested variable", async () => {
+  const connection = new EventEmitter();
+  connection.write = () => queueMicrotask(() => connection.emit("data", Buffer.from([
+    255, 250, 70, 1, ...Buffer.from("ROOMS"), 2, ...Buffer.from("42"),
+    1, ...Buffer.from("PLAYERS"), 2, ...Buffer.from("9"), 255, 240
+  ])));
+  connection.destroy = () => {};
+
+  const result = await probeMssp({
+    host: "example.test",
+    port: 4000,
+    variable: "rooms",
+    connect: async () => connection,
+    timeoutMs: 100
+  });
+  assert.deepEqual(result.values, { ROOMS: "42" });
+});

@@ -101,9 +101,18 @@ export function initializeMsspDirectoryField({
   const directory = doc.getElementById("mud-directory");
   const checkAll = doc.getElementById("mud-mssp-check-all");
   const filter = doc.getElementById("mud-mssp-filter");
+  const variableField = doc.getElementById("mud-mssp-variable");
   const status = doc.getElementById("mud-mssp-status");
+  const resultsOverlay = doc.getElementById("mud-mssp-results-overlay");
+  const resultsTitle = doc.getElementById("mud-mssp-results-title");
+  const resultsSummary = doc.getElementById("mud-mssp-results-summary");
+  const resultsList = doc.getElementById("mud-mssp-results-list");
   const entries = Array.from(doc.querySelectorAll(".mud-directory-entry"));
   if (!directory || !fetchFn || entries.length === 0) return;
+
+  const getSelectedVariable = () => variableField?.value?.trim().toUpperCase() || "PLAYERS";
+  const getSelectedVariableLabel = () => variableField?.selectedOptions?.[0]?.textContent || getSelectedVariable();
+  const formatValue = (value) => Array.isArray(value) ? value.join(", ") : String(value ?? "");
 
   const addValueOption = (key) => {
     if (!filter || !key || Array.from(filter.options).some((option) => option.value === `has:${key}`)) return;
@@ -113,37 +122,43 @@ export function initializeMsspDirectoryField({
     filter.append(option);
   };
 
-  const updateEntry = (entry, result) => {
+  const updateEntry = (entry, result, variable) => {
     const values = Object.keys(result.values || {}).map((key) => key.toUpperCase());
     entry.dataset.msspSupported = result.supported === true ? "true" : "false";
     entry.dataset.msspValues = values.join(",");
     values.forEach(addValueOption);
     const resultElement = entry.querySelector(".mud-mssp-result");
     if (resultElement) {
-      const summary = Object.entries(result.values || {})
-        .map(([key, value]) => `${key.toLowerCase()}=${Array.isArray(value) ? value.join(", ") : value}`)
-        .join("; ");
-      resultElement.textContent = result.supported === true
-        ? `MSSP: ${summary || "supported"}`
-        : "MSSP unavailable";
-      if (summary) resultElement.title = summary;
+      const value = result.values?.[variable];
+      resultElement.textContent = result.supported === true && value != null
+        ? `${variable}: ${formatValue(value)}`
+        : result.supported === true ? "MSSP: value not declared" : "MSSP unavailable";
+      if (value != null) {
+        resultElement.title = `${variable}: ${formatValue(value)}`;
+      } else {
+        resultElement.removeAttribute("title");
+      }
     }
     doc.getElementById("mud-language-filter")?.dispatchEvent(new doc.defaultView.Event("change"));
   };
 
-  const checkEntry = async (entry) => {
+  const checkEntry = async (entry, variable = getSelectedVariable()) => {
     const link = entry.querySelector(".mud-directory-link");
     const button = entry.querySelector(".mud-mssp-check");
-    if (!link) return;
+    if (!link) return { supported: false, values: {} };
     button?.setAttribute("aria-busy", "true");
     try {
-      const params = new URLSearchParams({ host: link.dataset.msspHost, port: link.dataset.msspPort });
+      const params = new URLSearchParams({ host: link.dataset.msspHost, port: link.dataset.msspPort, variable });
       if (link.dataset.msspTls === "true") params.set("transport_mode", "tls");
       const response = await fetchFn(`/mssp/?${params.toString()}`);
+      if (!response.ok && response.ok !== undefined) throw new Error("MSSP request failed");
       const result = await response.json();
-      updateEntry(entry, result);
+      updateEntry(entry, result, variable);
+      return result;
     } catch {
-      updateEntry(entry, { supported: false });
+      const result = { supported: false, values: {} };
+      updateEntry(entry, result, variable);
+      return result;
     } finally {
       button?.removeAttribute("aria-busy");
     }
@@ -158,19 +173,49 @@ export function initializeMsspDirectoryField({
   checkAll?.addEventListener("click", async () => {
     checkAll.disabled = true;
     let completed = 0;
-    if (status) status.textContent = `Checking MSSP support (0/${entries.length})...`;
+    const variable = getSelectedVariable();
+    const label = getSelectedVariableLabel();
+    const results = [];
+    if (status) status.textContent = `Scanning ${label} (0/${entries.length})...`;
     const queue = entries.slice();
     const worker = async () => {
       while (queue.length) {
         const entry = queue.shift();
-        await checkEntry(entry);
+        const result = await checkEntry(entry, variable);
+        const value = result.values?.[variable];
+        if (result.supported === true && value != null) {
+          results.push({ entry, value });
+        }
         completed++;
-        if (status) status.textContent = `Checking MSSP support (${completed}/${entries.length})...`;
+        if (status) status.textContent = `Scanning ${label} (${completed}/${entries.length})...`;
       }
     };
     await Promise.all(Array.from({ length: Math.min(8, entries.length) }, worker));
     checkAll.disabled = false;
-    if (status) status.textContent = "MSSP directory loaded. Choose a filter to narrow the list.";
+    if (status) status.textContent = `${results.length} MUDs declared ${label}.`;
+    if (resultsOverlay && resultsTitle && resultsSummary && resultsList) {
+      resultsTitle.textContent = `MUDs declaring ${label}`;
+      resultsSummary.textContent = `${results.length} MUDs returned a ${label.toLowerCase()} value.`;
+      resultsList.replaceChildren();
+      results.sort((left, right) => left.entry.querySelector(".mud-directory-name").textContent.localeCompare(right.entry.querySelector(".mud-directory-name").textContent));
+      results.forEach(({ entry, value }) => {
+        const row = doc.createElement("div");
+        row.className = "mud-mssp-result-row";
+        const name = doc.createElement("span");
+        name.className = "mud-mssp-result-name";
+        name.textContent = entry.querySelector(".mud-directory-name")?.textContent.trim() || "Unnamed MUD";
+        const declaredValue = doc.createElement("span");
+        declaredValue.className = "mud-mssp-result-value";
+        declaredValue.textContent = formatValue(value);
+        row.append(name, declaredValue);
+        resultsList.append(row);
+      });
+      resultsOverlay.classList.remove("hide");
+    }
+  });
+
+  doc.getElementById("mud-mssp-results-close")?.addEventListener("click", () => {
+    resultsOverlay?.classList.add("hide");
   });
 }
 
