@@ -8,7 +8,7 @@
 
 From the repository folder, double-click `run domeclient.bat`. It installs dependencies on first run, creates a local `.env` from `.env-example-local` when needed, builds the browser bundle, and starts the client. Open the local URL printed by the server.
 
-The multi-MUD connect screen includes a bundled directory of active/recently reachable games from mu*index, MUDVerse, and MudStats. mu*index entries include measured language and charset metadata where available; selecting one applies its default encoding, including GBK/Big5, EUC-KR, and KOI8-R language defaults. TopMUDSites, MUDConnect, and the unreliable TheMUDs.org listing are not used.
+The multi-MUD connect screen includes a bundled directory of active/recently reachable games from mu*index, MUDVerse, MudStats, IPTIA, Mudhaven, Vineyard, Grapevine, the Evennia Game Index, and the Anime MUD Network. mu*index entries include measured language and charset metadata where available; selecting one applies its default encoding, including GBK/Big5, EUC-KR, and KOI8-R language defaults. TopMUDSites, MUDConnect, and the unreliable TheMUDs.org listing are not used.
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?logo=node.js&logoColor=white)](#requirements)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE.txt)
@@ -26,17 +26,17 @@ This project is a fork of [SindomeCorp/dome-client](https://github.com/SindomeCo
 This fork extends the original [SindomeCorp/dome-client](https://github.com/SindomeCorp/dome-client) for general-purpose multi-MUD use:
 
 - Supports connections to arbitrary MUD hosts and ports instead of a single configured game.
-- Adds a bundled directory of 1,127 deduplicated, currently reachable or recently confirmed MUDs from mu*index, MUDVerse, MudStats, and IPTIA.
+- Adds a bundled directory of 1,144 deduplicated MUDs from the active/recent directory sources listed above, including anime/Dragonball games from AMN and Evennia games.
 - Includes 286 additional active MUD entries imported from IPTIA’s software-organized directory, after filtering detail pages to MUD/MUSH/MUCK/MOO categories and excluding BBS records.
-- Adds clickable directory links with search and language filtering, including Chinese, English, German, Italian, Korean, Polish, Russian, Spanish, and unknown-language listings.
-- Adds MSSP option-70 checks beside directory entries, a progressive single-variable MSSP scan, and clean popup lists for MUDs declaring values such as players, rooms, areas, races, and other MSSP variables.
+- Adds clickable directory links with search, language filtering, an experimental genre filter, website links, and a wiki-only view/list.
+- Adds MSSP option-70 checks beside directory entries, a progressive single-variable MSSP scan, and clean popup lists for MUDs declaring values such as players, rooms, areas, races, and other MSSP variables. The bundled scan records 445 MSSP-capable and 699 non-MSSP entries; bulk checks skip known non-MSSP games.
 - Adds explicit and automatic encoding support for UTF-8, GBK/GB18030, Big5, EUC-KR/CP949, Shift-JIS, EUC-JP, KOI8-R/KOI8-U, CP866, Windows code pages, and ISO-8859-1.
 - Applies per-MUD encoding defaults from directory metadata and remembers manually selected encodings per host and port.
 - Excludes stale directory sources such as TheMUDs.org, TopMUDSites, and MUDConnect.
 - Improves command delivery with ordered socket writes, byte-accurate command encoding, connection checks, and acknowledgements.
 - Includes `run domeclient.bat` for local Windows setup, building, server startup, readiness checking, and browser launch.
 
-The directory can be refreshed with `scripts/refresh-mud-directory.mjs`. IPTIA entries can be re-imported with `node scripts/import-iptia-mud-directory.mjs`; its importer uses the site’s `www` endpoint with certificate verification disabled because the site’s certificate is not consistently valid, and still validates the returned page/category data before adding entries. Directory data is bundled locally so the connect page remains usable without live directory requests.
+The directory can be refreshed with `scripts/refresh-mud-directory.mjs`. IPTIA entries can be re-imported with `node scripts/import-iptia-mud-directory.mjs`; its importer uses the site’s `www` endpoint with certificate verification disabled because the site’s certificate is not consistently valid, and still validates the returned page/category data before adding entries. The requested community sources can be refreshed with `node scripts/import-community-mud-sources.mjs`, and MSSP capability metadata can be refreshed with `node scripts/scan-mud-directory-mssp.mjs`. Directory data is bundled locally so the connect page remains usable without live directory requests.
 
 ## Single-MUD Quick Start
 ```bash
@@ -133,6 +133,7 @@ These are tracked goals for the fork:
 - Fully bundled client styling (local LESS/CSS and glyph assets), removing runtime dependency on external `dome.css` for consistent mobile/desktop rendering.
 - Optional multi-game landing mode (`MULTI_MUD`) with host/port-first connect flow and persisted per-game connection metrics.
 - MSSP directory checks from the multi-MUD landing page. Individual **Check MSSP** buttons query the selected variable for one game. The **Scan selected value** control checks only the chosen MSSP variable across the bundled entries and opens a sorted popup containing only MUD names and that value, avoiding the time and clutter of fetching every variable for every game. MSSP checks use the standard Telnet option 70 negotiation and do not send login commands.
+- Directory metadata includes clickable declared websites, discovered wiki links, experimental genre labels, and source provenance. The wiki control opens a focused list without mixing wiki URLs into the terminal connection links.
 
 ## Connection Modes
 

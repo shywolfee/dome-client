@@ -42,6 +42,20 @@
       </select><br>
       <label for="mud-directory-search">MUD DIRECTORY</label><br>
       <input id="mud-directory-search" type="search" placeholder="Search MUDs by name or host" autocomplete="off"><br>
+      <% var mudGenres = Array.from(new Set((mudDirectory || []).map(function(mud) { return mud.genre || 'Unknown'; }).filter(Boolean))).sort(function(a, b) { return a.localeCompare(b); }); %>
+      <label for="mud-genre-filter">GENRE (EXPERIMENTAL)</label><br>
+      <select id="mud-genre-filter" name="genre_filter">
+        <option value="">Any genre</option>
+        <% mudGenres.forEach(function(genre) { %>
+        <option value="<%= genre.toLowerCase() %>"><%= genre %></option>
+        <% }); %>
+      </select><br>
+      <label for="mud-wiki-filter">WIKI DIRECTORY</label><br>
+      <select id="mud-wiki-filter" name="wiki_filter">
+        <option value="">All MUDs</option>
+        <option value="has-wiki">MUDs with wikis</option>
+      </select>
+      <button id="mud-wiki-list" class="btn btn-default mud-mssp-check-all" type="button">View wiki list</button><br>
       <label for="mud-mssp-filter">MSSP DIRECTORY FILTER</label><br>
       <select id="mud-mssp-filter" name="mssp_filter">
         <option value="">All MUDs</option>
@@ -72,13 +86,24 @@
           if (mud.tls) mudUrl += '&transport_mode=tls';
           if (mud.encoding && mud.encoding !== 'auto') mudUrl += '&encoding=' + encodeURIComponent(mud.encoding);
         %>
-        <div class="mud-directory-entry">
+        <div class="mud-directory-entry" data-mssp-supported="<%= mud.msspSupported === true ? 'true' : mud.msspSupported === false ? 'false' : '' %>" data-has-wiki="<%= mud.wiki ? 'true' : 'false' %>">
           <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>" data-mssp-host="<%= mud.host %>" data-mssp-port="<%= mud.port %>" data-mssp-tls="<%= mud.tls ? 'true' : 'false' %>"><div class="mud-directory-name"><%= mud.name %></div><div class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></div></a>
+          <% if (mud.website) { %><a class="mud-directory-external-link" href="<%= mud.website %>" target="_blank" rel="noopener noreferrer">Website</a><% } %>
+          <% if (mud.wiki) { %><a class="mud-directory-external-link" href="<%= mud.wiki %>" target="_blank" rel="noopener noreferrer">Wiki</a><% } %>
           <button class="btn btn-default mud-mssp-check" type="button" aria-label="Check MSSP for <%= mud.name %>">Check MSSP</button>
           <span class="mud-mssp-result" role="status"></span>
           <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
+          <span class="mud-directory-genre" aria-hidden="true"><%= mud.genre || 'Unknown' %></span>
         </div>
         <% }); %>
+      </div>
+      <div id="mud-wiki-results-overlay" class="mud-mssp-results-overlay hide" role="dialog" aria-modal="true" aria-labelledby="mud-wiki-results-title">
+        <div class="mud-mssp-results-panel">
+          <button id="mud-wiki-results-close" class="btn btn-default mud-mssp-results-close" type="button" aria-label="Close wiki results">Close</button>
+          <h3 id="mud-wiki-results-title">MUD wikis</h3>
+          <p id="mud-wiki-results-summary" class="mud-mssp-results-summary"></p>
+          <div id="mud-wiki-results-list" class="mud-mssp-results-list"></div>
+        </div>
       </div>
       <div id="mud-mssp-results-overlay" class="mud-mssp-results-overlay hide" role="dialog" aria-modal="true" aria-labelledby="mud-mssp-results-title">
         <div class="mud-mssp-results-panel">

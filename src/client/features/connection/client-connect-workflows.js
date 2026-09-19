@@ -72,6 +72,8 @@ export function initializeMudDirectoryField({ doc = globalThis.document }) {
   const applyFilters = () => {
     const query = searchField?.value.trim().toLowerCase() || "";
     const language = languageField?.value || "";
+    const genre = doc.getElementById("mud-genre-filter")?.value || "";
+    const wikiFilter = doc.getElementById("mud-wiki-filter")?.value || "";
     const msspFilter = doc.getElementById("mud-mssp-filter")?.value || "";
     links.forEach((link) => {
       const entry = link.closest(".mud-directory-entry") || link;
@@ -80,15 +82,20 @@ export function initializeMudDirectoryField({ doc = globalThis.document }) {
         || "unknown";
       const matchesSearch = query === "" || link.dataset.search.includes(query);
       const matchesLanguage = language === "" || languageLabel === language;
+      const genreLabel = entry.querySelector(".mud-directory-genre")?.textContent.trim().toLowerCase() || "unknown";
+      const matchesGenre = genre === "" || genreLabel === genre;
+      const matchesWiki = wikiFilter !== "has-wiki" || entry.dataset.hasWiki === "true";
       const values = (entry.dataset.msspValues || "").split(",").filter(Boolean);
       const matchesMssp = msspFilter === ""
         || (msspFilter === "supported" && entry.dataset.msspSupported === "true")
         || (msspFilter.startsWith("has:") && values.includes(msspFilter.slice(4)));
-      entry.classList.toggle("hide", !matchesSearch || !matchesLanguage || !matchesMssp);
+      entry.classList.toggle("hide", !matchesSearch || !matchesLanguage || !matchesGenre || !matchesWiki || !matchesMssp);
     });
   };
   searchField?.addEventListener("input", applyFilters);
   languageField?.addEventListener("change", applyFilters);
+  doc.getElementById("mud-genre-filter")?.addEventListener("change", applyFilters);
+  doc.getElementById("mud-wiki-filter")?.addEventListener("change", applyFilters);
   doc.getElementById("mud-mssp-filter")?.addEventListener("change", applyFilters);
   applyFilters();
 }
@@ -176,8 +183,8 @@ export function initializeMsspDirectoryField({
     const variable = getSelectedVariable();
     const label = getSelectedVariableLabel();
     const results = [];
-    if (status) status.textContent = `Scanning ${label} (0/${entries.length})...`;
-    const queue = entries.slice();
+    const queue = entries.filter((entry) => entry.dataset.msspSupported !== "false");
+    if (status) status.textContent = `Scanning ${label} (0/${queue.length})...`;
     const worker = async () => {
       while (queue.length) {
         const entry = queue.shift();
@@ -187,10 +194,10 @@ export function initializeMsspDirectoryField({
           results.push({ entry, value });
         }
         completed++;
-        if (status) status.textContent = `Scanning ${label} (${completed}/${entries.length})...`;
+        if (status) status.textContent = `Scanning ${label} (${completed}/${queue.length})...`;
       }
     };
-    await Promise.all(Array.from({ length: Math.min(8, entries.length) }, worker));
+    await Promise.all(Array.from({ length: Math.min(8, queue.length || 1) }, worker));
     checkAll.disabled = false;
     if (status) status.textContent = `${results.length} MUDs declared ${label}.`;
     if (resultsOverlay && resultsTitle && resultsSummary && resultsList) {
@@ -217,6 +224,40 @@ export function initializeMsspDirectoryField({
   doc.getElementById("mud-mssp-results-close")?.addEventListener("click", () => {
     resultsOverlay?.classList.add("hide");
   });
+}
+
+export function initializeWikiDirectoryField({ doc = globalThis.document }) {
+  const button = doc.getElementById("mud-wiki-list");
+  const overlay = doc.getElementById("mud-wiki-results-overlay");
+  const summary = doc.getElementById("mud-wiki-results-summary");
+  const list = doc.getElementById("mud-wiki-results-list");
+  if (!button || !overlay || !summary || !list) return;
+  button.addEventListener("click", () => {
+    const results = Array.from(doc.querySelectorAll(".mud-directory-entry")).map((entry) => ({
+      entry,
+      wiki: Array.from(entry.querySelectorAll("a.mud-directory-external-link")).find((link) => link.textContent.trim() === "Wiki")
+    })).filter(({ wiki }) => wiki);
+    list.replaceChildren();
+    results.sort((left, right) => left.entry.querySelector(".mud-directory-name").textContent.localeCompare(right.entry.querySelector(".mud-directory-name").textContent));
+    results.forEach(({ entry, wiki }) => {
+      const row = doc.createElement("div");
+      row.className = "mud-mssp-result-row";
+      const name = doc.createElement("span");
+      name.className = "mud-mssp-result-name";
+      name.textContent = entry.querySelector(".mud-directory-name")?.textContent.trim() || "Unnamed MUD";
+      const link = doc.createElement("a");
+      link.className = "mud-mssp-result-value";
+      link.href = wiki.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open wiki";
+      row.append(name, link);
+      list.append(row);
+    });
+    summary.textContent = `${results.length} MUDs have a directory wiki link.`;
+    overlay.classList.remove("hide");
+  });
+  doc.getElementById("mud-wiki-results-close")?.addEventListener("click", () => overlay.classList.add("hide"));
 }
 
 export function setupConnectPageChrome({ doc = globalThis.document, win = globalThis.window }) {

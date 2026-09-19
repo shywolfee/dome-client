@@ -15,6 +15,7 @@ import {
   initializeTransportModeField,
   initializeEncodingField,
   initializeMudDirectoryField,
+  initializeWikiDirectoryField,
   initializeMsspDirectoryField,
   setupConnectPageChrome
 } from "../features/connection/client-connect-workflows.js";
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   initializeEncodingField({ doc: document, store, host: DEFAULT_MUD_HOST, port: DEFAULT_MUD_PORT });
   initializeMudDirectoryField({ doc: document });
+  initializeWikiDirectoryField({ doc: document });
   initializeMsspDirectoryField({ doc: document, win: window });
 
   const autoUser = getParameterByName("auto", window.location.search);
