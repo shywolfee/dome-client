@@ -99,7 +99,8 @@ await fs.writeFile(outputPath, JSON.stringify({
   sources: [
     "mu*index active/players-now API",
     "MUDVerse active/recently reached directory",
-    "MudStats online worlds"
+    "MudStats online worlds",
+    "IPTIA BBS/MUD directory (MUD software entries)"
   ],
   entries: retained
 }, null, 2) + "\n", "utf8");
