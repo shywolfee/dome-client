@@ -6,6 +6,7 @@ import * as screens from "../controllers/screens.js";
 import * as save from "../controllers/save.js";
 import * as status from "../controllers/status.js";
 import * as health from "../controllers/health.js";
+import * as mssp from "../controllers/mssp.js";
 
 const router = express.Router();
 
@@ -41,5 +42,6 @@ router.get("/ac/:type", autocomplete.basic);
 router.post("/save/:filename", save.log);
 router.get("/moo/status/", status.get);
 router.get("/health/", health.get);
+router.get("/mssp/", mssp.check);
 
 export default router;

@@ -42,14 +42,29 @@
       </select><br>
       <label for="mud-directory-search">MUD DIRECTORY</label><br>
       <input id="mud-directory-search" type="search" placeholder="Search MUDs by name or host" autocomplete="off"><br>
+      <label for="mud-mssp-filter">MSSP DIRECTORY FILTER</label><br>
+      <select id="mud-mssp-filter" name="mssp_filter">
+        <option value="">All MUDs</option>
+        <option value="supported">MUDs with MSSP</option>
+        <option value="has:PLAYERS">MUDs declaring players</option>
+        <option value="has:ROOMS">MUDs declaring rooms</option>
+        <option value="has:AREAS">MUDs declaring areas</option>
+        <option value="has:RACES">MUDs declaring races</option>
+      </select>
+      <button id="mud-mssp-check-all" class="btn btn-default mud-mssp-check-all" type="button">Load MSSP directory</button>
+      <span id="mud-mssp-status" class="mud-mssp-status" role="status"></span><br>
       <div id="mud-directory" class="mud-directory-list">
         <% (mudDirectory || []).forEach(function(mud) {
           var mudUrl = '/player-client/?gh=' + encodeURIComponent(mud.host) + '&gp=' + encodeURIComponent(mud.port);
           if (mud.tls) mudUrl += '&transport_mode=tls';
           if (mud.encoding && mud.encoding !== 'auto') mudUrl += '&encoding=' + encodeURIComponent(mud.encoding);
         %>
-        <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>"><div class="mud-directory-name"><%= mud.name %></div><div class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></div></a>
-        <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
+        <div class="mud-directory-entry">
+          <a class="mud-directory-link" href="<%= mudUrl %>" data-search="<%= (mud.name + ' ' + mud.host + ' ' + (mud.language || '')).toLowerCase() %>" data-mssp-host="<%= mud.host %>" data-mssp-port="<%= mud.port %>" data-mssp-tls="<%= mud.tls ? 'true' : 'false' %>"><div class="mud-directory-name"><%= mud.name %></div><div class="mud-directory-details"><%= mud.host %>:<%= mud.port %> · <%= mud.language || 'language unknown' %> · <%= mud.encoding || 'auto' %> · <%= mud.status %></div></a>
+          <button class="btn btn-default mud-mssp-check" type="button" aria-label="Check MSSP for <%= mud.name %>">Check MSSP</button>
+          <span class="mud-mssp-result" role="status"></span>
+          <span class="mud-directory-language" aria-hidden="true"><%= mud.language || 'Unknown' %></span>
+        </div>
         <% }); %>
       </div>
       <label for="mud-encoding">MUD ENCODING</label><br>

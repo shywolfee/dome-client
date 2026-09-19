@@ -8,6 +8,7 @@ import {
   createConnectAction,
   getParameterByName,
   initializeMudDirectoryField,
+  initializeMsspDirectoryField,
   initializeAddressFields,
   initializeTransportModeField,
   parsePlayerClientTransportMode,
@@ -29,6 +30,41 @@ test("MUD directory filters links by language", () => {
   language.dispatchEvent(new window.Event("change"));
   assert.equal(links[0].classList.contains("hide"), false);
   assert.equal(links[1].classList.contains("hide"), true);
+});
+
+test("MSSP directory checks populate support and variable filters", async () => {
+  const { window } = setupDom(null, `<!doctype html><html><body>
+    <select id="mud-language-filter"><option value="">Any language</option></select>
+    <input id="mud-directory-search">
+    <select id="mud-mssp-filter"><option value="">All MUDs</option><option value="supported">MUDs with MSSP</option></select>
+    <button id="mud-mssp-check-all"></button><span id="mud-mssp-status"></span>
+    <div id="mud-directory">
+      <div class="mud-directory-entry"><a class="mud-directory-link" data-search="one" data-mssp-host="one.test" data-mssp-port="4000"></a><button class="mud-mssp-check"></button><span class="mud-mssp-result"></span><span class="mud-directory-language">English</span></div>
+      <div class="mud-directory-entry"><a class="mud-directory-link" data-search="two" data-mssp-host="two.test" data-mssp-port="4001"></a><button class="mud-mssp-check"></button><span class="mud-mssp-result"></span><span class="mud-directory-language">English</span></div>
+    </div>
+  </body></html>`);
+
+  initializeMudDirectoryField({ doc: window.document });
+  initializeMsspDirectoryField({
+    doc: window.document,
+    win: window,
+    fetchFn: async (url) => ({
+      async json() {
+        return url.includes("one.test")
+          ? { supported: true, values: { ROOMS: "12" } }
+          : { supported: false, values: {} };
+      }
+    })
+  });
+  const buttons = [...window.document.querySelectorAll(".mud-mssp-check")];
+  buttons[0].click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const filter = window.document.getElementById("mud-mssp-filter");
+  filter.value = "has:ROOMS";
+  filter.dispatchEvent(new window.Event("change"));
+  const entries = [...window.document.querySelectorAll(".mud-directory-entry")];
+  assert.equal(entries[0].classList.contains("hide"), false);
+  assert.equal(entries[1].classList.contains("hide"), true);
 });
 
 function createStore(t) {

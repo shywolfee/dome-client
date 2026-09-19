@@ -72,15 +72,106 @@ export function initializeMudDirectoryField({ doc = globalThis.document }) {
   const applyFilters = () => {
     const query = searchField?.value.trim().toLowerCase() || "";
     const language = languageField?.value || "";
+    const msspFilter = doc.getElementById("mud-mssp-filter")?.value || "";
     links.forEach((link) => {
-      const languageLabel = link.nextElementSibling?.textContent.trim().toLowerCase() || "unknown";
+      const entry = link.closest(".mud-directory-entry") || link;
+      const languageLabel = entry.querySelector(".mud-directory-language")?.textContent.trim().toLowerCase()
+        || link.nextElementSibling?.textContent.trim().toLowerCase()
+        || "unknown";
       const matchesSearch = query === "" || link.dataset.search.includes(query);
       const matchesLanguage = language === "" || languageLabel === language;
-      link.classList.toggle("hide", !matchesSearch || !matchesLanguage);
+      const values = (entry.dataset.msspValues || "").split(",").filter(Boolean);
+      const matchesMssp = msspFilter === ""
+        || (msspFilter === "supported" && entry.dataset.msspSupported === "true")
+        || (msspFilter.startsWith("has:") && values.includes(msspFilter.slice(4)));
+      entry.classList.toggle("hide", !matchesSearch || !matchesLanguage || !matchesMssp);
     });
   };
   searchField?.addEventListener("input", applyFilters);
   languageField?.addEventListener("change", applyFilters);
+  doc.getElementById("mud-mssp-filter")?.addEventListener("change", applyFilters);
+  applyFilters();
+}
+
+export function initializeMsspDirectoryField({
+  doc = globalThis.document,
+  win = globalThis.window,
+  fetchFn = win?.fetch?.bind(win)
+}) {
+  const directory = doc.getElementById("mud-directory");
+  const checkAll = doc.getElementById("mud-mssp-check-all");
+  const filter = doc.getElementById("mud-mssp-filter");
+  const status = doc.getElementById("mud-mssp-status");
+  const entries = Array.from(doc.querySelectorAll(".mud-directory-entry"));
+  if (!directory || !fetchFn || entries.length === 0) return;
+
+  const addValueOption = (key) => {
+    if (!filter || !key || Array.from(filter.options).some((option) => option.value === `has:${key}`)) return;
+    const option = doc.createElement("option");
+    option.value = `has:${key}`;
+    option.textContent = `MUDs declaring ${key.toLowerCase()}`;
+    filter.append(option);
+  };
+
+  const updateEntry = (entry, result) => {
+    const values = Object.keys(result.values || {}).map((key) => key.toUpperCase());
+    entry.dataset.msspSupported = result.supported === true ? "true" : "false";
+    entry.dataset.msspValues = values.join(",");
+    values.forEach(addValueOption);
+    const resultElement = entry.querySelector(".mud-mssp-result");
+    if (resultElement) {
+      const summary = Object.entries(result.values || {})
+        .map(([key, value]) => `${key.toLowerCase()}=${Array.isArray(value) ? value.join(", ") : value}`)
+        .join("; ");
+      resultElement.textContent = result.supported === true
+        ? `MSSP: ${summary || "supported"}`
+        : "MSSP unavailable";
+      if (summary) resultElement.title = summary;
+    }
+    doc.getElementById("mud-language-filter")?.dispatchEvent(new doc.defaultView.Event("change"));
+  };
+
+  const checkEntry = async (entry) => {
+    const link = entry.querySelector(".mud-directory-link");
+    const button = entry.querySelector(".mud-mssp-check");
+    if (!link) return;
+    button?.setAttribute("aria-busy", "true");
+    try {
+      const params = new URLSearchParams({ host: link.dataset.msspHost, port: link.dataset.msspPort });
+      if (link.dataset.msspTls === "true") params.set("transport_mode", "tls");
+      const response = await fetchFn(`/mssp/?${params.toString()}`);
+      const result = await response.json();
+      updateEntry(entry, result);
+    } catch {
+      updateEntry(entry, { supported: false });
+    } finally {
+      button?.removeAttribute("aria-busy");
+    }
+  };
+
+  entries.forEach((entry) => entry.querySelector(".mud-mssp-check")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    checkEntry(entry);
+  }));
+
+  checkAll?.addEventListener("click", async () => {
+    checkAll.disabled = true;
+    let completed = 0;
+    if (status) status.textContent = `Checking MSSP support (0/${entries.length})...`;
+    const queue = entries.slice();
+    const worker = async () => {
+      while (queue.length) {
+        const entry = queue.shift();
+        await checkEntry(entry);
+        completed++;
+        if (status) status.textContent = `Checking MSSP support (${completed}/${entries.length})...`;
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(8, entries.length) }, worker));
+    checkAll.disabled = false;
+    if (status) status.textContent = "MSSP directory loaded. Choose a filter to narrow the list.";
+  });
 }
 
 export function setupConnectPageChrome({ doc = globalThis.document, win = globalThis.window }) {
